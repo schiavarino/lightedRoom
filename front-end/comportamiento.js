@@ -1,53 +1,56 @@
-let withField = document.getElementById("matrixWidth");
+let widthField = document.getElementById("matrixWidth");
 let heightField = document.getElementById("matrixHeight");
 let visual = document.getElementById("visual");
 let maker = document.getElementById("makeMatrix");
 let send = document.getElementById("send");
-let matrix = [];
 
-const makeRow = (width) => {
-    let fil = [];
+function createRow(width) {
+    let row = [];
     for (let i = 0; i < width; i++) {
-        fil.push(0);
+        row.push(0);
     }
-    return fil;
+    return row;
 };
 
-const makeMatrix = (height, width) => {
+function createMatrix(height, width) {
+    let matrix = [];
     for (let i = 0; i < height; i++) {
-        let newRow = makeRow(width);
+        let newRow = createRow(width);
         matrix.push(newRow);
     }
     return matrix;
 };
 
-const displayMatriz = (mat) => {
-    for (let i = 0; i < mat.length; i++) {
+function displayMatriz(matrix) {
+    for (let i = 0; i < matrix.length; i++) {
         let visualRow = document.createElement("div");
         visualRow.classList.add("newRow");
-        for (let e = 0; e < mat[i].length; e++) {
-            let newElem = document.createElement("input");
-            newElem.setAttribute("type", "checkbox");
-            newElem.classList.add("square");
-            newElem.setAttribute("id", `${i}:${e}`);
-            visualRow.appendChild(newElem);
+        for (let e = 0; e < matrix[i].length; e++) {
+            let newElement = document.createElement("input");
+            newElement.setAttribute("type", "checkbox");
+            newElement.classList.add("square");
+            newElement.setAttribute("id", `${i}:${e}`);
+            visualRow.appendChild(newElement);
         }
         visual.appendChild(visualRow);
     }
 };
 
-const display = () => {
+function display() {
     visual.innerHTML = null;
-    let an = withField.value;
-    let al = heightField.value;
-    matrix = makeMatrix(al, an);
+    let width = widthField.value;
+    let height = heightField.value;
+    matrix = createMatrix(height, width);
     displayMatriz(matrix);
-    matrix = [];
-    withField.value = null;
+    clearMatrixValues();
+};
+
+function clearMatrixValues() {
+    widthField.value = null;
     heightField.value = null;
 };
 
-const makePayload = () => {
+function createPayload() {
     let payload = {};
     let height = visual.childElementCount;
     payload.height = height;
@@ -55,14 +58,30 @@ const makePayload = () => {
     payload.width = width;
     let detalle = document.getElementsByClassName("square");
     let deta = [...detalle];
-    payload.data = [];
-    deta.map((square) => {
+
+    var lastRow = 0;
+    let matrix = Array(height).fill(null).map(() => Array(width).fill(null));
+    let matrixRow = matrix[0];
+    for (var i = 0; i < deta.length; i++) {
+        let item = deta[i];
+        let row = item.id.charAt(0);
+        let column = item.id.charAt(2);
         let info = {
-            coord: square.id,
-            value: square.checked,
+            value: item.checked,
         };
-        payload.data.push(info);
-    });
+        
+        if(row != lastRow) {
+            matrixRow = matrix[row];
+        }
+
+        matrixRow[column] = info;
+        
+        lastRow = row;
+    }
+
+    payload.data = matrix;
+
+    console.dir(payload);
 
     return payload;
 };
@@ -79,14 +98,15 @@ const displaySolution = (resp) => {
     /// convertir cada array en una fila de divs ///
 };
 
+const matrixPath = "http://localhost:3001/matrix"
+
 const submit = async () => {
-    const data = makePayload();
+    const data = createPayload();
 
     const payload = await JSON.stringify(data);
 
-    fetch("http://localhost:3001/matrix", {
+    fetch(matrixPath, {
         method: "POST",
-
         headers: {
             "Content-Type": "application/json",
         },

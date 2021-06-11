@@ -1,4 +1,25 @@
-# lightedRoom
-Download files. 
-Open server.js in VSC, install dependencies and run nodemon server.js
-Open front-end folder in other VSC window, and run it with "Go Live" plugin.
+# LightedRoom
+
+## Prerequisites
+- Git
+- Node
+
+## Clone project
+```
+git clone https://github.com/GasTrotteyn/lightedRoom.git
+```
+
+## Install dependencies
+```
+npm install
+```
+
+## Run project
+```
+node server.js
+```
+
+## Open web browser
+```
+http://localhost:3001
+```
